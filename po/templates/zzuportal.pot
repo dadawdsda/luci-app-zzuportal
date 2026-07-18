@@ -1,0 +1,201 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#, javascript-format
+msgid "%s complete"
+msgstr ""
+
+#, javascript-format
+msgid "%s failed"
+msgstr ""
+
+#, javascript-format
+msgid "%s failed: "
+msgstr ""
+
+#, javascript-format
+msgid "%s in progress..."
+msgstr ""
+
+msgid "Account"
+msgstr ""
+
+msgid "CMCC"
+msgstr ""
+
+msgid "Change MAC & Re-login"
+msgstr ""
+
+msgid "Check Interval"
+msgstr ""
+
+msgid "Connectivity Host"
+msgstr ""
+
+msgid "Duration"
+msgstr ""
+
+msgid "Enable automatic Portal status monitoring and recovery."
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Failed to read system log."
+msgstr ""
+
+msgid "Fetching data..."
+msgstr ""
+
+msgid "Grant UCI and RPC access to LuCI app zzuportal"
+msgstr ""
+
+msgid "IP"
+msgstr ""
+
+msgid "IPv4 address or host name used for the interface connectivity probe."
+msgstr ""
+
+msgid "ISP"
+msgstr ""
+
+msgid "Info URL"
+msgstr ""
+
+msgid "Info unavailable"
+msgstr ""
+
+msgid "Interface"
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Log"
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "Login Type"
+msgstr ""
+
+msgid "Login URL"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "Logout URL"
+msgstr ""
+
+msgid "MAC Settle Delay"
+msgstr ""
+
+msgid "Main Settings"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Mobile"
+msgstr ""
+
+msgid "Monitoring"
+msgstr ""
+
+msgid "NetworkExit"
+msgstr ""
+
+msgid "No zzuportal log entries."
+msgstr ""
+
+msgid "Not found"
+msgstr ""
+
+msgid "Not logged in"
+msgstr ""
+
+msgid "Online"
+msgstr ""
+
+msgid "PC"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Portal URL"
+msgstr ""
+
+msgid "Portal state abnormal"
+msgstr ""
+
+msgid "Refresh"
+msgstr ""
+
+msgid "Refresh complete"
+msgstr ""
+
+msgid "Refresh failed"
+msgstr ""
+
+msgid "Refresh failed: "
+msgstr ""
+
+msgid "Restore Default URLs"
+msgstr ""
+
+msgid "Restore Defaults"
+msgstr ""
+
+msgid "Seconds between status checks."
+msgstr ""
+
+msgid "Seconds to wait after changing the MAC before logging in."
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Stored as plain text in UCI and Base64-encoded only when making the login request."
+msgstr ""
+
+msgid "Student ID used for Portal login."
+msgstr ""
+
+msgid "TELECOM"
+msgstr ""
+
+msgid "The Portal URL addresses may vary by region; you can enter a custom URL here."
+msgstr ""
+
+msgid "UNICOM"
+msgstr ""
+
+msgid "Use this device only when it carries an IPv4 default route. The current default-route device is used when unset."
+msgstr ""
+
+msgid "User login information"
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "ZZU Portal Log"
+msgstr ""
+
+msgid "ZZU Portal Tool"
+msgstr ""
+
+msgid "ZZUPLAN"
+msgstr ""
+
+msgid "ZZUWLAN"
+msgstr ""

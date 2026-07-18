@@ -1,0 +1,92 @@
+#!/usr/bin/env ucode
+
+'use strict';
+
+import { popen } from 'fs';
+
+function runCommand(command, fallbackMessage) {
+	const process = popen(command);
+	if (!process)
+		return { error: 1, msg: fallbackMessage };
+
+	const output = trim(process.read('all') || '');
+	const exitStatus = process.close();
+	return {
+		error: exitStatus ? 1 : 0,
+		msg: output || fallbackMessage
+	};
+}
+
+const methods = {
+	status: {
+		call: function() {
+			const process = popen('/etc/zzuportal/status.sh');
+			if (!process)
+				return { result: -2, state: 'error', msg: 'Failed to execute the Portal status script.' };
+
+			const output = trim(process.read('all') || '');
+			process.close();
+			if (!output)
+				return { result: -2, state: 'error', msg: 'Portal status script returned no data.' };
+
+			return json(output);
+		}
+	},
+
+	login: {
+		call: function() {
+			return runCommand('/etc/zzuportal/login.sh', 'Login failed.');
+		}
+	},
+
+	logout: {
+		call: function() {
+			return runCommand('/etc/zzuportal/logout.sh', 'Logout failed.');
+		}
+	},
+
+	change_mac: {
+		call: function() {
+			return runCommand('/etc/zzuportal/change-mac.sh', 'MAC change failed.');
+		}
+	},
+
+	relogin: {
+		call: function() {
+			return runCommand('/etc/zzuportal/relogin.sh --start', 'Failed to start MAC change and re-login.');
+		}
+	},
+
+	relogin_status: {
+		call: function() {
+			const process = popen('/etc/zzuportal/relogin.sh --status');
+			if (!process)
+				return { state: 'failed', msg: 'Failed to read the re-login job status.' };
+
+			const output = trim(process.read('all') || '');
+			const exitStatus = process.close();
+			if (exitStatus || !output)
+				return { state: 'failed', msg: 'Failed to read the re-login job status.' };
+
+			return json(output);
+		}
+	},
+
+	log: {
+		call: function() {
+			const process = popen('logread -e zzuportal 2>/dev/null | tail -n 300');
+			if (!process)
+				return { error: 1, log: '', msg: 'Failed to read system log.' };
+
+			const output = process.read('all') || '';
+			const exitStatus = process.close();
+			return {
+				error: exitStatus ? 1 : 0,
+				log: output,
+				msg: exitStatus ? 'Failed to read system log.' : ''
+			};
+		}
+	}
+};
+
+return { 'luci.zzuportal': methods };

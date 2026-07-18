@@ -1,0 +1,125 @@
+#!/bin/sh
+
+. "${ZZUPORTAL_COMMON_SH:-/etc/zzuportal/common.sh}"
+
+script_directory="${ZZUPORTAL_SCRIPT_DIR:-/etc/zzuportal}"
+auth_failure_marker="${ZZUPORTAL_AUTH_FAILURE_MARKER:-/tmp/zzuportal-auth-failure}"
+continuous_mode=0
+case "$1" in
+	--loop|-L) continuous_mode=1 ;;
+	--once|"") ;;
+	--help|-h)
+		echo "Usage: zzuportal [--once|--loop]"
+		exit 0
+		;;
+	*)
+		echo "Unknown option: $1" >&2
+		exit 2
+		;;
+esac
+
+previous_state=""
+report_state_change() {
+	local state="$1"
+	local message="$2"
+	local priority="${3:-info}"
+
+	if [ "$state" != "$previous_state" ]; then
+		zzuportal_log "$priority" "$message"
+		previous_state="$state"
+	fi
+}
+
+pause_monitor_after_auth_failure() {
+	local message="$1"
+
+	zzuportal_log err "Automatic login stopped due to invalid credentials: $message"
+	if : >"$auth_failure_marker"; then
+		zzuportal_log err "Automatic monitoring is paused; saving the corrected configuration will resume it."
+	else
+		zzuportal_log err "Failed to record the credential error pause state."
+	fi
+}
+
+run_monitor_cycle() {
+	local portal_device status_json portal_state status_message
+	local command_output command_exit_code
+
+	zzuportal_load_config
+	portal_device=$(zzuportal_resolve_device)
+	if [ -z "$portal_device" ]; then
+		report_state_change no_device "No portal interface or IPv4 default route is available." warning
+		return
+	fi
+	if [ ! -e "/sys/class/net/$portal_device" ]; then
+		report_state_change no_device "Configured portal interface '$portal_device' does not exist." warning
+		return
+	fi
+	if ! zzuportal_device_has_default_route "$portal_device"; then
+		report_state_change not_default "Interface $portal_device is not carrying an IPv4 default route; monitoring is idle." info
+		return
+	fi
+
+	if zzuportal_check_connectivity "$portal_device" "$zzuportal_check_host"; then
+		report_state_change connectivity_online "Connectivity is available on $portal_device." info
+		return
+	fi
+
+	status_json=$("$script_directory/status.sh" -i "$zzuportal_info_url" -d "$portal_device" 2>/dev/null)
+	portal_state=$(printf '%s' "$status_json" | jq -r '.state // "error"' 2>/dev/null)
+	status_message=$(printf '%s' "$status_json" | jq -r '.msg // "No status message."' 2>/dev/null)
+
+	case "$portal_state" in
+		logged_in)
+			report_state_change logged_in_offline "Portal session is logged in but connectivity failed on $portal_device; treating this as an upstream issue." warning
+			;;
+		logged_out)
+			report_state_change logged_out "Portal session is logged out on $portal_device; starting login." notice
+			command_output=$("$script_directory/login.sh" 2>&1)
+			command_exit_code=$?
+			if [ "$command_exit_code" -eq "$ZZUPORTAL_EXIT_AUTH_FAILURE" ]; then
+				pause_monitor_after_auth_failure "$command_output"
+				return "$ZZUPORTAL_EXIT_AUTH_FAILURE"
+			elif [ "$command_exit_code" -ne 0 ]; then
+				zzuportal_log err "Automatic login failed: $command_output"
+			fi
+			;;
+		abnormal)
+			report_state_change abnormal "Portal interception detected on $portal_device; changing MAC and re-logging in." warning
+			command_output=$("$script_directory/relogin.sh" 2>&1)
+			command_exit_code=$?
+			if [ "$command_exit_code" -eq "$ZZUPORTAL_EXIT_AUTH_FAILURE" ]; then
+				pause_monitor_after_auth_failure "$command_output"
+				return "$ZZUPORTAL_EXIT_AUTH_FAILURE"
+			elif [ "$command_exit_code" -ne 0 ]; then
+				zzuportal_log err "Automatic MAC change and re-login failed: $command_output"
+			fi
+			;;
+		*)
+			report_state_change status_error "Unable to determine Portal state on $portal_device: $status_message" warning
+			;;
+	esac
+}
+
+zzuportal_load_config
+if [ "$zzuportal_enabled" != "1" ]; then
+	zzuportal_log info "Service is disabled in UCI configuration."
+	exit 0
+fi
+if [ -e "$auth_failure_marker" ]; then
+	zzuportal_log warning "Portal monitor remains paused after a credential error; save the corrected configuration to resume."
+	exit 0
+fi
+
+zzuportal_log notice "Portal monitor started."
+while :; do
+	run_monitor_cycle
+	monitor_exit_code=$?
+	if [ "$monitor_exit_code" -eq "$ZZUPORTAL_EXIT_AUTH_FAILURE" ]; then
+		zzuportal_log notice "Portal monitor stopped after a credential error."
+		exit "$ZZUPORTAL_EXIT_AUTH_FAILURE"
+	fi
+	[ "$continuous_mode" -eq 1 ] || break
+	sleep "$zzuportal_check_interval"
+done
+zzuportal_log notice "Portal monitor stopped."

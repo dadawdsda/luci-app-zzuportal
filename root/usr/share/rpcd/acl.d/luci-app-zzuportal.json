@@ -1,0 +1,30 @@
+{
+  "luci-app-zzuportal": {
+    "description": "Grant UCI and RPC access to LuCI app zzuportal",
+    "read": {
+      "ubus": {
+        "luci.zzuportal": [
+          "status",
+          "log",
+          "relogin_status"
+        ]
+      },
+      "uci": [
+        "zzuportal"
+      ]
+    },
+    "write": {
+      "ubus": {
+        "luci.zzuportal": [
+          "change_mac",
+          "login",
+          "logout",
+          "relogin"
+        ]
+      },
+      "uci": [
+        "zzuportal"
+      ]
+    }
+  }
+}

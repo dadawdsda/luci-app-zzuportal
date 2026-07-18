@@ -1,0 +1,37 @@
+{
+  "admin/services/zzuportal": {
+    "title": "ZZU Portal Tool",
+    "order": 60,
+    "action": {
+      "type": "firstchild"
+    },
+    "depends": {
+      "acl": [ "luci-app-zzuportal" ]
+    }
+  },
+  "admin/services/zzuportal/status": {
+    "title": "Status",
+    "order": 1,
+    "action": {
+      "type": "view",
+      "path": "zzuportal/status"
+    }
+  },
+  "admin/services/zzuportal/settings": {
+    "title": "Settings",
+    "order": 2,
+    "action": {
+      "type": "view",
+      "path": "zzuportal/settings"
+    }
+  },
+
+  "admin/services/zzuportal/log": {
+    "title": "Log",
+    "order": 3,
+    "action": {
+      "type": "view",
+      "path": "zzuportal/log"
+    }
+  }
+}
