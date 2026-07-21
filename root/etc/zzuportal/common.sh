@@ -6,9 +6,13 @@ ZZUPORTAL_LOG_TAG="zzuportal"
 ZZUPORTAL_DEFAULT_LOGIN_URL="http://172.16.2.9:801/eportal/portal/login?callback=dr1004&login_method=1"
 ZZUPORTAL_DEFAULT_LOGOUT_URL="http://172.16.2.9:801/eportal/portal/mac/unbind?callback=dr1002"
 ZZUPORTAL_DEFAULT_INFO_URL="http://172.16.2.9:801/eportal/portal/custom?callback=dr1002"
-ZZUPORTAL_DEFAULT_CHECK_HOST="223.5.5.5"
+ZZUPORTAL_DEFAULT_CHECK_ADDRESSES="www.baidu.com
+www.qq.com"
+ZZUPORTAL_DEFAULT_CHECK_METHOD="icmp"
 ZZUPORTAL_DEFAULT_CHECK_INTERVAL=10
-ZZUPORTAL_DEFAULT_MAC_SETTLE_DELAY=3
+ZZUPORTAL_DEFAULT_FAILURE_THRESHOLD=3
+ZZUPORTAL_DEFAULT_MAC_SETTLE_DELAY=20
+ZZUPORTAL_DEFAULT_PORTAL_SYNC_DELAY=5
 ZZUPORTAL_EXIT_AUTH_FAILURE=10
 
 zzuportal_log() {
@@ -39,7 +43,21 @@ zzuportal_device_has_default_route() {
 		END { exit !found }'
 }
 
+zzuportal_add_check_address() {
+	local address="$1"
+
+	[ -n "$address" ] || return
+	if [ -n "$zzuportal_check_addresses" ]; then
+		zzuportal_check_addresses="$zzuportal_check_addresses
+$address"
+	else
+		zzuportal_check_addresses="$address"
+	fi
+}
+
 zzuportal_load_config() {
+	local legacy_check_host
+
 	config_load zzuportal
 	config_get zzuportal_enabled main enabled "0"
 	config_get zzuportal_interface main interface
@@ -50,21 +68,46 @@ zzuportal_load_config() {
 	config_get zzuportal_login_url main login_url "$ZZUPORTAL_DEFAULT_LOGIN_URL"
 	config_get zzuportal_logout_url main logout_url "$ZZUPORTAL_DEFAULT_LOGOUT_URL"
 	config_get zzuportal_info_url main info_url "$ZZUPORTAL_DEFAULT_INFO_URL"
-	config_get zzuportal_check_host main check_host "$ZZUPORTAL_DEFAULT_CHECK_HOST"
+	zzuportal_check_addresses=""
+	config_list_foreach main check_address zzuportal_add_check_address
+	config_get legacy_check_host main check_host
+	config_get zzuportal_check_method main check_method "$ZZUPORTAL_DEFAULT_CHECK_METHOD"
 	config_get zzuportal_check_interval main check_interval "$ZZUPORTAL_DEFAULT_CHECK_INTERVAL"
+	config_get zzuportal_failure_threshold main failure_threshold "$ZZUPORTAL_DEFAULT_FAILURE_THRESHOLD"
 	config_get zzuportal_mac_settle_delay main mac_settle_delay "$ZZUPORTAL_DEFAULT_MAC_SETTLE_DELAY"
+	config_get zzuportal_portal_sync_delay main portal_sync_delay "$ZZUPORTAL_DEFAULT_PORTAL_SYNC_DELAY"
 
 	[ -n "$zzuportal_login_url" ] || zzuportal_login_url="$ZZUPORTAL_DEFAULT_LOGIN_URL"
 	[ -n "$zzuportal_logout_url" ] || zzuportal_logout_url="$ZZUPORTAL_DEFAULT_LOGOUT_URL"
 	[ -n "$zzuportal_info_url" ] || zzuportal_info_url="$ZZUPORTAL_DEFAULT_INFO_URL"
-	[ -n "$zzuportal_check_host" ] || zzuportal_check_host="$ZZUPORTAL_DEFAULT_CHECK_HOST"
+	if [ -z "$zzuportal_check_addresses" ]; then
+		zzuportal_check_addresses="${legacy_check_host:-$ZZUPORTAL_DEFAULT_CHECK_ADDRESSES}"
+	fi
+	case "$zzuportal_check_method" in
+		icmp|curl) ;;
+		*) zzuportal_check_method="$ZZUPORTAL_DEFAULT_CHECK_METHOD" ;;
+	esac
 	case "$zzuportal_check_interval" in
 		''|*[!0-9]*) zzuportal_check_interval="$ZZUPORTAL_DEFAULT_CHECK_INTERVAL" ;;
 	esac
 	[ "$zzuportal_check_interval" -ge 5 ] 2>/dev/null || zzuportal_check_interval=5
+	case "$zzuportal_failure_threshold" in
+		''|*[!0-9]*) zzuportal_failure_threshold="$ZZUPORTAL_DEFAULT_FAILURE_THRESHOLD" ;;
+	esac
+	if [ "$zzuportal_failure_threshold" -lt 1 ] 2>/dev/null ||
+		[ "$zzuportal_failure_threshold" -gt 20 ] 2>/dev/null; then
+		zzuportal_failure_threshold="$ZZUPORTAL_DEFAULT_FAILURE_THRESHOLD"
+	fi
 	case "$zzuportal_mac_settle_delay" in
 		''|*[!0-9]*) zzuportal_mac_settle_delay="$ZZUPORTAL_DEFAULT_MAC_SETTLE_DELAY" ;;
 	esac
+	case "$zzuportal_portal_sync_delay" in
+		''|*[!0-9]*) zzuportal_portal_sync_delay="$ZZUPORTAL_DEFAULT_PORTAL_SYNC_DELAY" ;;
+	esac
+	if [ "$zzuportal_portal_sync_delay" -lt 5 ] 2>/dev/null ||
+		[ "$zzuportal_portal_sync_delay" -gt 10 ] 2>/dev/null; then
+		zzuportal_portal_sync_delay="$ZZUPORTAL_DEFAULT_PORTAL_SYNC_DELAY"
+	fi
 }
 
 zzuportal_resolve_device() {
@@ -77,10 +120,40 @@ zzuportal_resolve_device() {
 
 zzuportal_check_connectivity() {
 	local device="$1"
-	local host="${2:-$ZZUPORTAL_DEFAULT_CHECK_HOST}"
+	local address original_ifs probe_target
 
 	[ -n "$device" ] || return 1
-	ping -I "$device" -c 1 -W 3 "$host" >/dev/null 2>&1
+	original_ifs="$IFS"
+	IFS='
+'
+	for address in $zzuportal_check_addresses; do
+		[ -n "$address" ] || continue
+		case "$zzuportal_check_method" in
+			curl)
+				case "$address" in
+					*://*) probe_target="$address" ;;
+					*) probe_target="https://$address" ;;
+				esac
+				if curl -4 -sS --connect-timeout 3 --max-time 5 --interface "$device" \
+					-o /dev/null "$probe_target" >/dev/null 2>&1; then
+					IFS="$original_ifs"
+					return 0
+				fi
+				;;
+			*)
+				probe_target="${address#*://}"
+				probe_target="${probe_target%%/*}"
+				probe_target="${probe_target%%\?*}"
+				probe_target="${probe_target%%:*}"
+				if ping -I "$device" -c 1 -W 3 "$probe_target" >/dev/null 2>&1; then
+					IFS="$original_ifs"
+					return 0
+				fi
+				;;
+		esac
+	done
+	IFS="$original_ifs"
+	return 1
 }
 
 zzuportal_normalize_mac_address() {

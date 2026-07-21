@@ -29,7 +29,13 @@ msgstr ""
 msgid "Check Interval"
 msgstr ""
 
-msgid "Connectivity Host"
+msgid "Connectivity Addresses"
+msgstr ""
+
+msgid "Connectivity Method"
+msgstr ""
+
+msgid "Consecutive failed rounds required before checking the Portal status."
 msgstr ""
 
 msgid "Duration"
@@ -47,16 +53,19 @@ msgstr ""
 msgid "Failed to read system log."
 msgstr ""
 
+msgid "Failure Threshold"
+msgstr ""
+
 msgid "Fetching data..."
 msgstr ""
 
 msgid "Grant UCI and RPC access to LuCI app zzuportal"
 msgstr ""
 
-msgid "IP"
+msgid "ICMP"
 msgstr ""
 
-msgid "IPv4 address or host name used for the interface connectivity probe."
+msgid "IP"
 msgstr ""
 
 msgid "ISP"
@@ -131,6 +140,9 @@ msgstr ""
 msgid "Portal URL"
 msgstr ""
 
+msgid "Portal Sync Delay"
+msgstr ""
+
 msgid "Portal state abnormal"
 msgstr ""
 
@@ -155,7 +167,10 @@ msgstr ""
 msgid "Seconds between status checks."
 msgstr ""
 
-msgid "Seconds to wait after changing the MAC before logging in."
+msgid "Seconds to wait for the network link after changing the MAC."
+msgstr ""
+
+msgid "Seconds to wait after logging out the new MAC before logging in."
 msgstr ""
 
 msgid "Settings"
@@ -171,6 +186,9 @@ msgid "Student ID used for Portal login."
 msgstr ""
 
 msgid "TELECOM"
+msgstr ""
+
+msgid "Targets are checked in order until one succeeds. ICMP accepts host names or IP addresses. curl accepts URLs and uses HTTPS when the scheme is omitted."
 msgstr ""
 
 msgid "The Portal URL addresses may vary by region; you can enter a custom URL here."
@@ -198,4 +216,7 @@ msgid "ZZUPLAN"
 msgstr ""
 
 msgid "ZZUWLAN"
+msgstr ""
+
+msgid "curl"
 msgstr ""

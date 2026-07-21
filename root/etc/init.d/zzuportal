@@ -8,14 +8,22 @@ STOP=10
 PROGRAM="/usr/bin/zzuportal"
 AUTH_FAILURE_MARKER="/tmp/zzuportal-auth-failure"
 
+log_service_event() {
+	logger -t zzuportal -p daemon.notice "$1"
+}
+
 start_service() {
 	local service_enabled
 
 	rm -f "$AUTH_FAILURE_MARKER"
 	config_load zzuportal
 	config_get_bool service_enabled main enabled 0
-	[ "$service_enabled" -eq 1 ] || return 0
+	if [ "$service_enabled" -ne 1 ]; then
+		log_service_event "Portal service start skipped because it is disabled."
+		return 0
+	fi
 
+	log_service_event "Portal service starting."
 	procd_open_instance
 	procd_set_param command "$PROGRAM" --loop
 	procd_set_param respawn 3600 5 5
@@ -23,7 +31,13 @@ start_service() {
 	procd_close_instance
 }
 
+stop_service() {
+	log_service_event "Portal service stopping."
+	procd_kill zzuportal
+}
+
 reload_service() {
+	log_service_event "Portal service reloading."
 	stop
 	start
 }

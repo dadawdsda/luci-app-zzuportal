@@ -7,7 +7,7 @@ PKG_VERSION:=26.7.16
 PKG_RELEASE:=1
 
 LUCI_TITLE:=ZZU Portal automatic authentication client
-LUCI_DEPENDS:=+luci-base +uhttpd +curl +coreutils-base64 +jq
+LUCI_DEPENDS:=+luci-base +uhttpd +curl +ca-bundle +coreutils-base64 +jq
 LUCI_PKGARCH:=all
 
 PKG_LICENSE:=MIT

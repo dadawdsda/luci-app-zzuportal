@@ -38,8 +38,14 @@ msgstr "更改 MAC 并重新登录"
 msgid "Check Interval"
 msgstr "检测间隔"
 
-msgid "Connectivity Host"
-msgstr "连通性检测主机"
+msgid "Connectivity Addresses"
+msgstr "连通性检测地址"
+
+msgid "Connectivity Method"
+msgstr "连通性检测方式"
+
+msgid "Consecutive failed rounds required before checking the Portal status."
+msgstr "连续检测失败达到此次数后，才查询 Portal 状态。"
 
 msgid "Duration"
 msgstr "在线时长"
@@ -56,17 +62,20 @@ msgstr "错误"
 msgid "Failed to read system log."
 msgstr "读取系统日志失败。"
 
+msgid "Failure Threshold"
+msgstr "失败次数阈值"
+
 msgid "Fetching data..."
 msgstr "正在获取数据..."
 
 msgid "Grant UCI and RPC access to LuCI app zzuportal"
 msgstr "授予 ZZU Portal LuCI 应用访问 UCI 和 RPC 的权限"
 
+msgid "ICMP"
+msgstr "ICMP"
+
 msgid "IP"
 msgstr "IP 地址"
-
-msgid "IPv4 address or host name used for the interface connectivity probe."
-msgstr "用于检测接口网络连通性的 IPv4 地址或主机名。"
 
 msgid "ISP"
 msgstr "运营商"
@@ -140,6 +149,9 @@ msgstr "密码"
 msgid "Portal URL"
 msgstr "Portal 地址"
 
+msgid "Portal Sync Delay"
+msgstr "Portal 同步等待时间"
+
 msgid "Portal state abnormal"
 msgstr "Portal 状态异常"
 
@@ -164,8 +176,11 @@ msgstr "恢复默认"
 msgid "Seconds between status checks."
 msgstr "两次状态检测之间的间隔秒数。"
 
-msgid "Seconds to wait after changing the MAC before logging in."
-msgstr "更改 MAC 后等待多少秒再执行登录。"
+msgid "Seconds to wait for the network link after changing the MAC."
+msgstr "更改 MAC 后等待网络链路稳定的秒数。"
+
+msgid "Seconds to wait after logging out the new MAC before logging in."
+msgstr "使用新 MAC 注销后，等待多少秒再执行登录。"
 
 msgid "Settings"
 msgstr "设置"
@@ -181,6 +196,9 @@ msgstr "用于 Portal 登录的学号。"
 
 msgid "TELECOM"
 msgstr "中国电信"
+
+msgid "Targets are checked in order until one succeeds. ICMP accepts host names or IP addresses. curl accepts URLs and uses HTTPS when the scheme is omitted."
+msgstr "按顺序检测各地址，任一成功即停止。ICMP 可填写主机名或 IP 地址；curl 可填写 URL，省略协议时使用 HTTPS。"
 
 msgid "The Portal URL addresses may vary by region; you can enter a custom URL here."
 msgstr "不同区域使用的 Portal 地址可能不同，可在此处填写自定义 URL。"
@@ -208,3 +226,6 @@ msgstr "学科专网"
 
 msgid "ZZUWLAN"
 msgstr "校园网"
+
+msgid "curl"
+msgstr "curl"

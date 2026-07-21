@@ -55,9 +55,15 @@ return view.extend({
 		section = map.section(form.TypedSection, 'main', _('Monitoring'));
 		section.anonymous = true;
 
-		option = section.option(form.Value, 'check_host', _('Connectivity Host'),
-			_('IPv4 address or host name used for the interface connectivity probe.'));
-		option.default = '223.5.5.5';
+		option = section.option(form.ListValue, 'check_method', _('Connectivity Method'));
+		option.value('icmp', _('ICMP'));
+		option.value('curl', _('curl'));
+		option.default = 'icmp';
+		option.rmempty = false;
+
+		option = section.option(form.DynamicList, 'check_address', _('Connectivity Addresses'),
+			_('Targets are checked in order until one succeeds. ICMP accepts host names or IP addresses. curl accepts URLs and uses HTTPS when the scheme is omitted.'));
+		option.default = [ 'www.baidu.com', 'www.qq.com' ];
 		option.rmempty = false;
 
 		option = section.option(form.Value, 'check_interval', _('Check Interval'),
@@ -66,10 +72,22 @@ return view.extend({
 		option.default = '10';
 		option.rmempty = false;
 
-		option = section.option(form.Value, 'mac_settle_delay', _('MAC Settle Delay'),
-			_('Seconds to wait after changing the MAC before logging in.'));
-		option.datatype = 'range(0,60)';
+		option = section.option(form.Value, 'failure_threshold', _('Failure Threshold'),
+			_('Consecutive failed rounds required before checking the Portal status.'));
+		option.datatype = 'range(1,20)';
 		option.default = '3';
+		option.rmempty = false;
+
+		option = section.option(form.Value, 'mac_settle_delay', _('MAC Settle Delay'),
+			_('Seconds to wait for the network link after changing the MAC.'));
+		option.datatype = 'range(0,60)';
+		option.default = '20';
+		option.rmempty = false;
+
+		option = section.option(form.Value, 'portal_sync_delay', _('Portal Sync Delay'),
+			_('Seconds to wait after logging out the new MAC before logging in.'));
+		option.datatype = 'range(5,10)';
+		option.default = '5';
 		option.rmempty = false;
 
 		section = map.section(form.TypedSection, 'main', _('Portal URL'),

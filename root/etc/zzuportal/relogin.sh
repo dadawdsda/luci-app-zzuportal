@@ -26,8 +26,15 @@ run_relogin() {
 	zzuportal_load_config
 	portal_device=$(zzuportal_resolve_device)
 	zzuportal_log notice "Starting MAC change and re-login on $portal_device."
+	if ! "$script_directory/logout.sh" >/dev/null 2>&1; then
+		zzuportal_log warning "Pre-change logout request failed on $portal_device; continuing with the MAC change."
+	fi
 	"$script_directory/change-mac.sh" "$portal_device" || return $?
 	sleep "$zzuportal_mac_settle_delay"
+	if ! "$script_directory/logout.sh" >/dev/null 2>&1; then
+		zzuportal_log warning "Post-change logout request failed on $portal_device; continuing with re-login."
+	fi
+	sleep "$zzuportal_portal_sync_delay"
 	"$script_directory/login.sh"
 }
 

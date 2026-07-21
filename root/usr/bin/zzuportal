@@ -19,6 +19,7 @@ case "$1" in
 esac
 
 previous_state=""
+connectivity_failure_count=0
 report_state_change() {
 	local state="$1"
 	local message="$2"
@@ -48,22 +49,32 @@ run_monitor_cycle() {
 	zzuportal_load_config
 	portal_device=$(zzuportal_resolve_device)
 	if [ -z "$portal_device" ]; then
+		connectivity_failure_count=0
 		report_state_change no_device "No portal interface or IPv4 default route is available." warning
 		return
 	fi
 	if [ ! -e "/sys/class/net/$portal_device" ]; then
+		connectivity_failure_count=0
 		report_state_change no_device "Configured portal interface '$portal_device' does not exist." warning
 		return
 	fi
 	if ! zzuportal_device_has_default_route "$portal_device"; then
+		connectivity_failure_count=0
 		report_state_change not_default "Interface $portal_device is not carrying an IPv4 default route; monitoring is idle." info
 		return
 	fi
 
-	if zzuportal_check_connectivity "$portal_device" "$zzuportal_check_host"; then
+	if zzuportal_check_connectivity "$portal_device"; then
+		connectivity_failure_count=0
 		report_state_change connectivity_online "Connectivity is available on $portal_device." info
 		return
 	fi
+
+	connectivity_failure_count=$((connectivity_failure_count + 1))
+	if [ "$connectivity_failure_count" -lt "$zzuportal_failure_threshold" ]; then
+		return
+	fi
+	connectivity_failure_count=0
 
 	status_json=$("$script_directory/status.sh" -i "$zzuportal_info_url" -d "$portal_device" 2>/dev/null)
 	portal_state=$(printf '%s' "$status_json" | jq -r '.state // "error"' 2>/dev/null)

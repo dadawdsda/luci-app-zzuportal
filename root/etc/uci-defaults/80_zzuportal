@@ -5,9 +5,21 @@ uci -q get zzuportal.main >/dev/null || uci set zzuportal.main=main
 uci -q get zzuportal.main.enabled >/dev/null || uci set zzuportal.main.enabled=0
 uci -q get zzuportal.main.type >/dev/null || uci set zzuportal.main.type=0
 uci -q get zzuportal.main.isp >/dev/null || uci set zzuportal.main.isp=zzuwlan
-uci -q get zzuportal.main.check_host >/dev/null || uci set zzuportal.main.check_host='www.baidu.com'
+if ! uci -q get zzuportal.main.check_address >/dev/null; then
+	legacy_check_host=$(uci -q get zzuportal.main.check_host)
+	if [ -n "$legacy_check_host" ]; then
+		uci add_list "zzuportal.main.check_address=$legacy_check_host"
+	else
+		uci add_list zzuportal.main.check_address='www.baidu.com'
+		uci add_list zzuportal.main.check_address='www.qq.com'
+	fi
+fi
+uci -q delete zzuportal.main.check_host
+uci -q get zzuportal.main.check_method >/dev/null || uci set zzuportal.main.check_method=icmp
 uci -q get zzuportal.main.check_interval >/dev/null || uci set zzuportal.main.check_interval=10
+uci -q get zzuportal.main.failure_threshold >/dev/null || uci set zzuportal.main.failure_threshold=3
 uci -q get zzuportal.main.mac_settle_delay >/dev/null || uci set zzuportal.main.mac_settle_delay=20
+uci -q get zzuportal.main.portal_sync_delay >/dev/null || uci set zzuportal.main.portal_sync_delay=5
 uci -q get zzuportal.main.login_url >/dev/null || uci set zzuportal.main.login_url='http://172.16.2.9:801/eportal/portal/login?callback=dr1004&login_method=1'
 uci -q get zzuportal.main.logout_url >/dev/null || uci set zzuportal.main.logout_url='http://172.16.2.9:801/eportal/portal/mac/unbind?callback=dr1002'
 uci -q get zzuportal.main.info_url >/dev/null || uci set zzuportal.main.info_url='http://172.16.2.9:801/eportal/portal/custom?callback=dr1002'
