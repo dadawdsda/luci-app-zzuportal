@@ -6,6 +6,7 @@ ZZUPORTAL_LOG_TAG="zzuportal"
 ZZUPORTAL_DEFAULT_LOGIN_URL="http://172.16.2.9:801/eportal/portal/login?callback=dr1004&login_method=1"
 ZZUPORTAL_DEFAULT_LOGOUT_URL="http://172.16.2.9:801/eportal/portal/mac/unbind?callback=dr1002"
 ZZUPORTAL_DEFAULT_INFO_URL="http://172.16.2.9:801/eportal/portal/custom?callback=dr1002"
+ZZUPORTAL_DEFAULT_INTERCEPTION_PROBE_URL="http://172.16.2.9/"
 ZZUPORTAL_DEFAULT_CHECK_ADDRESSES="www.baidu.com
 www.qq.com"
 ZZUPORTAL_DEFAULT_CHECK_METHOD="icmp"

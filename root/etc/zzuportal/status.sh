@@ -37,28 +37,37 @@ curl -sS --connect-timeout 3 --max-time 15 --interface "$portal_device" \
 	-D "$headers_file" -o "$body_file" "$zzuportal_info_url"
 curl_exit_code=$?
 
-if [ "$curl_exit_code" -ne 0 ]; then
-	zzuportal_print_status_json -2 error "Portal status request failed (curl $curl_exit_code)."
-	exit 1
+if [ "$curl_exit_code" -eq 0 ]; then
+	response_body=$(cat "$body_file")
+	if response_json=$(zzuportal_extract_response_json "$response_body" dr1002); then
+		response_result=$(printf '%s' "$response_json" | jq -r '.result // empty')
+		case "$response_result" in
+			1) portal_state="logged_in" ;;
+			0) portal_state="logged_out" ;;
+			*) portal_state="error" ;;
+		esac
+		printf '%s' "$response_json" | jq -c --arg state "$portal_state" '. + { state: $state }'
+		[ "$portal_state" != "error" ]
+		exit $?
+	fi
+
+	if zzuportal_is_interception_response "$headers_file" "$body_file"; then
+		zzuportal_print_status_json -1 abnormal "Portal interception detected; changing MAC is required."
+		exit 0
+	fi
+	status_error="Portal returned an unrecognized response."
+else
+	status_error="Portal status request failed (curl $curl_exit_code)."
 fi
 
-response_body=$(cat "$body_file")
-if response_json=$(zzuportal_extract_response_json "$response_body" dr1002); then
-	response_result=$(printf '%s' "$response_json" | jq -r '.result // empty')
-	case "$response_result" in
-		1) portal_state="logged_in" ;;
-		0) portal_state="logged_out" ;;
-		*) portal_state="error" ;;
-	esac
-	printf '%s' "$response_json" | jq -c --arg state "$portal_state" '. + { state: $state }'
-	[ "$portal_state" != "error" ]
-	exit $?
-fi
-
-if zzuportal_is_interception_response "$headers_file" "$body_file"; then
+: >"$headers_file"
+: >"$body_file"
+if curl -4 -sS --connect-timeout 3 --max-time 5 --interface "$portal_device" \
+	-D "$headers_file" -o "$body_file" "$ZZUPORTAL_DEFAULT_INTERCEPTION_PROBE_URL" &&
+	zzuportal_is_interception_response "$headers_file" "$body_file"; then
 	zzuportal_print_status_json -1 abnormal "Portal interception detected; changing MAC is required."
 	exit 0
 fi
 
-zzuportal_print_status_json -2 error "Portal returned an unrecognized response."
+zzuportal_print_status_json -2 error "$status_error"
 exit 1

@@ -1,0 +1,57 @@
+#!/bin/sh
+
+headers_file=""
+body_file=""
+request_url=""
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+		--connect-timeout|--max-time|--interface|-D|-o)
+			option="$1"
+			value="$2"
+			shift 2
+			case "$option" in
+				-D) headers_file="$value" ;;
+				-o) body_file="$value" ;;
+			esac
+			;;
+		-4|-sS) shift ;;
+		*) request_url="$1"; shift ;;
+	esac
+done
+
+printf '%s\n' "$request_url" >>"$ZZUPORTAL_CURL_LOG"
+[ -z "$headers_file" ] || : >"$headers_file"
+[ -z "$body_file" ] || : >"$body_file"
+
+case "$ZZUPORTAL_TEST_SCENARIO:$request_url" in
+	logged_out:http://portal.test:801/info)
+		printf '%s' 'dr1002({"result":0,"msg":"not online"});' >"$body_file"
+		;;
+	direct_interception:http://portal.test:801/info)
+		printf '%s\n' 'HTTP/1.0 200 OK' 'Server: MAGI 1.0' >"$headers_file"
+		;;
+	timeout_interception:http://portal.test:801/info|timeout_error:http://portal.test:801/info|timeout_plain_http:http://portal.test:801/info)
+		exit 28
+		;;
+	unrecognized_interception:http://portal.test:801/info)
+		printf '%s' 'unexpected response' >"$body_file"
+		;;
+	timeout_interception:http://172.16.2.9/)
+		printf '%s\n' 'HTTP/1.0 200 OK' 'Server: MAGI 1.0' >"$headers_file"
+		;;
+	unrecognized_interception:http://172.16.2.9/)
+		printf '%s' '<script>location.replace("http://10.100.100.31/portal.do?wlanuserip=10.0.0.1")</script>' >"$body_file"
+		;;
+	timeout_error:http://172.16.2.9/)
+		exit 28
+		;;
+	timeout_plain_http:http://172.16.2.9/)
+		printf '%s\n' 'HTTP/1.1 200 OK' 'Server: nginx' >"$headers_file"
+		printf '%s' 'ordinary response' >"$body_file"
+		;;
+	*)
+		echo "Unexpected curl request: $ZZUPORTAL_TEST_SCENARIO $request_url" >&2
+		exit 2
+		;;
+esac

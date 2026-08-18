@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-zzuportal
 PKG_VERSION:=26.7.16
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 LUCI_TITLE:=ZZU Portal automatic authentication client
 LUCI_DEPENDS:=+luci-base +uhttpd +curl +ca-bundle +coreutils-base64 +jq
