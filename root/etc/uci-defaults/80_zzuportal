@@ -11,7 +11,7 @@ if ! uci -q get zzuportal.main.check_address >/dev/null; then
 		uci add_list "zzuportal.main.check_address=$legacy_check_host"
 	else
 		uci add_list zzuportal.main.check_address='www.baidu.com'
-		uci add_list zzuportal.main.check_address='www.qq.com'
+		uci add_list zzuportal.main.check_address='223.5.5.5'
 	fi
 fi
 uci -q delete zzuportal.main.check_host
@@ -20,6 +20,8 @@ uci -q get zzuportal.main.check_interval >/dev/null || uci set zzuportal.main.ch
 uci -q get zzuportal.main.failure_threshold >/dev/null || uci set zzuportal.main.failure_threshold=3
 uci -q get zzuportal.main.mac_settle_delay >/dev/null || uci set zzuportal.main.mac_settle_delay=20
 uci -q get zzuportal.main.portal_sync_delay >/dev/null || uci set zzuportal.main.portal_sync_delay=5
+uci -q get zzuportal.main.log_to_file >/dev/null || uci set zzuportal.main.log_to_file=1
+uci -q get zzuportal.main.log_file >/dev/null || uci set zzuportal.main.log_file='/tmp/log/zzuportal/run.log'
 uci -q get zzuportal.main.login_url >/dev/null || uci set zzuportal.main.login_url='http://172.16.2.9:801/eportal/portal/login?callback=dr1004&login_method=1'
 uci -q get zzuportal.main.logout_url >/dev/null || uci set zzuportal.main.logout_url='http://172.16.2.9:801/eportal/portal/mac/unbind?callback=dr1002'
 uci -q get zzuportal.main.info_url >/dev/null || uci set zzuportal.main.info_url='http://172.16.2.9:801/eportal/portal/custom?callback=dr1002'

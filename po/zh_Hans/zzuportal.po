@@ -62,6 +62,9 @@ msgstr "错误"
 msgid "Failed to read system log."
 msgstr "读取系统日志失败。"
 
+msgid "Failed to read log file."
+msgstr "读取日志文件失败。"
+
 msgid "Failure Threshold"
 msgstr "失败次数阈值"
 
@@ -92,6 +95,9 @@ msgstr "接口"
 msgid "Loading..."
 msgstr "正在加载..."
 
+msgid "Log File Path"
+msgstr "日志文件路径"
+
 msgid "Log"
 msgstr "日志"
 
@@ -109,6 +115,9 @@ msgstr "登出"
 
 msgid "Logout URL"
 msgstr "登出 URL"
+
+msgid "Logging"
+msgstr "日志"
 
 msgid "MAC Settle Delay"
 msgstr "MAC 生效等待时间"
@@ -167,6 +176,9 @@ msgstr "刷新失败"
 msgid "Refresh failed: "
 msgstr "刷新失败： "
 
+msgid "Scroll to Bottom"
+msgstr "滚动到底部"
+
 msgid "Restore Default URLs"
 msgstr "恢复默认 Portal 地址"
 
@@ -212,8 +224,17 @@ msgstr "仅当此设备承载 IPv4 默认路由时使用；留空则使用当前
 msgid "User login information"
 msgstr "用户登录信息"
 
+msgid "Path used for the zzuportal runtime log file."
+msgstr "zzuportal 运行日志使用的文件路径。"
+
+msgid "Synchronously append zzuportal logs to the configured file while retaining system logs."
+msgstr "在保留系统日志的同时，将 zzuportal 日志同步追加到指定文件。"
+
 msgid "Username"
 msgstr "用户名"
+
+msgid "Write Logs to File"
+msgstr "写入日志文件"
 
 msgid "ZZU Portal Log"
 msgstr "ZZU Portal 日志"

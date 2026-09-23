@@ -1,7 +1,8 @@
 # luci-app-zzuportal
 
 用于郑州大学 Portal 网络的 OpenWrt LuCI 自动认证插件。插件由 procd 托管，使用
-OpenWrt 原生 `logd` 记录运行状态。
+OpenWrt 原生 `logd` 记录运行状态，并可同步追加到文件（默认启用，默认路径为
+`/tmp/log/zzuportal/run.log`）。
 
 接口默认适配主校区松园二期。其他宿舍园或校区的认证接口返回信息可能不同，仅修改页面
 中的请求地址仍可能无法使用，此时需要修改源代码进行适配。本项目适用于
@@ -51,14 +52,14 @@ curl 检测地址未填写协议时自动使用 HTTPS，以避免普通 HTTP 请
 ## 运维
 
 LuCI 页面位于“服务 -> ZZU Portal Tool”，包括状态、设置和日志三个页面。状态页提供
-刷新、登录、登出、改 MAC 并重新登录四个动作。日志页显示最近 300 条带有
-`zzuportal` 标签的系统日志。
+刷新、登录、登出、改 MAC 并重新登录四个动作。日志页显示配置日志文件中的内容。
 
-命令行检查：
+日志页读取配置的日志文件，支持手动刷新和滚动到底部。命令行检查：
 
 ```sh
 /usr/bin/zzuportal --once
 logread -e zzuportal
+cat /tmp/log/zzuportal/run.log
 /etc/init.d/zzuportal restart
 ```
 

@@ -2,7 +2,16 @@
 
 'use strict';
 
-import { popen } from 'fs';
+import { popen, readfile } from 'fs';
+import { cursor } from 'uci';
+
+const DEFAULT_LOG_FILE = '/tmp/log/zzuportal/run.log';
+
+function getLogFile() {
+	const uci = cursor();
+	uci.load('zzuportal');
+	return uci.get('zzuportal', 'main', 'log_file') || DEFAULT_LOG_FILE;
+}
 
 function runCommand(command, fallbackMessage) {
 	const process = popen(command);
@@ -74,16 +83,20 @@ const methods = {
 
 	log: {
 		call: function() {
-			const process = popen('logread -e zzuportal 2>/dev/null | tail -n 300');
-			if (!process)
-				return { error: 1, log: '', msg: 'Failed to read system log.' };
+			const logFile = getLogFile();
+			let output;
+			try {
+				output = readfile(logFile);
+			} catch (error) {
+				return { error: 1, log: '', msg: 'Failed to read log file.' };
+			}
+			if (output === null)
+				return { error: 1, log: '', msg: 'Failed to read log file.' };
 
-			const output = process.read('all') || '';
-			const exitStatus = process.close();
 			return {
-				error: exitStatus ? 1 : 0,
+				error: 0,
 				log: output,
-				msg: exitStatus ? 'Failed to read system log.' : ''
+				msg: ''
 			};
 		}
 	}

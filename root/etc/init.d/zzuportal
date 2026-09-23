@@ -8,8 +8,11 @@ STOP=10
 PROGRAM="/usr/bin/zzuportal"
 AUTH_FAILURE_MARKER="/tmp/zzuportal-auth-failure"
 
+. /etc/zzuportal/common.sh
+
 log_service_event() {
-	logger -t zzuportal -p daemon.notice "$1"
+	zzuportal_load_config
+	zzuportal_log notice "$1"
 }
 
 start_service() {

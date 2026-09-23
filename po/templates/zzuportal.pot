@@ -53,6 +53,9 @@ msgstr ""
 msgid "Failed to read system log."
 msgstr ""
 
+msgid "Failed to read log file."
+msgstr ""
+
 msgid "Failure Threshold"
 msgstr ""
 
@@ -83,6 +86,9 @@ msgstr ""
 msgid "Loading..."
 msgstr ""
 
+msgid "Log File Path"
+msgstr ""
+
 msgid "Log"
 msgstr ""
 
@@ -99,6 +105,9 @@ msgid "Logout"
 msgstr ""
 
 msgid "Logout URL"
+msgstr ""
+
+msgid "Logging"
 msgstr ""
 
 msgid "MAC Settle Delay"
@@ -158,6 +167,9 @@ msgstr ""
 msgid "Refresh failed: "
 msgstr ""
 
+msgid "Scroll to Bottom"
+msgstr ""
+
 msgid "Restore Default URLs"
 msgstr ""
 
@@ -203,7 +215,16 @@ msgstr ""
 msgid "User login information"
 msgstr ""
 
+msgid "Path used for the zzuportal runtime log file."
+msgstr ""
+
+msgid "Synchronously append zzuportal logs to the configured file while retaining system logs."
+msgstr ""
+
 msgid "Username"
+msgstr ""
+
+msgid "Write Logs to File"
 msgstr ""
 
 msgid "ZZU Portal Log"

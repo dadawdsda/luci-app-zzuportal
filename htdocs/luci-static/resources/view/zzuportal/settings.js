@@ -6,6 +6,7 @@
 var DEFAULT_LOGIN_URL = 'http://172.16.2.9:801/eportal/portal/login?callback=dr1004&login_method=1';
 var DEFAULT_LOGOUT_URL = 'http://172.16.2.9:801/eportal/portal/mac/unbind?callback=dr1002';
 var DEFAULT_INFO_URL = 'http://172.16.2.9:801/eportal/portal/custom?callback=dr1002';
+var DEFAULT_LOG_FILE = '/tmp/log/zzuportal/run.log';
 
 return view.extend({
 	render: function() {
@@ -88,6 +89,19 @@ return view.extend({
 			_('Seconds to wait after logging out the new MAC before logging in.'));
 		option.datatype = 'range(5,10)';
 		option.default = '5';
+		option.rmempty = false;
+
+		section = map.section(form.TypedSection, 'main', _('Logging'));
+		section.anonymous = true;
+
+		option = section.option(form.Flag, 'log_to_file', _('Write Logs to File'),
+			_('Synchronously append zzuportal logs to the configured file while retaining system logs.'));
+		option.default = '1';
+		option.rmempty = false;
+
+		option = section.option(form.Value, 'log_file', _('Log File Path'),
+			_('Path used for the zzuportal runtime log file.'));
+		option.default = DEFAULT_LOG_FILE;
 		option.rmempty = false;
 
 		section = map.section(form.TypedSection, 'main', _('Portal URL'),

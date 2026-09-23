@@ -29,7 +29,7 @@ return view.extend({
 				logOutput.textContent = response.log || _('No zzuportal log entries.');
 				status.textContent = '';
 			} else {
-				status.textContent = (response && response.msg) ? response.msg : _('Failed to read system log.');
+				status.textContent = (response && response.msg) ? response.msg : _('Failed to read log file.');
 			}
 		}
 
@@ -39,6 +39,12 @@ return view.extend({
 			return callGetLog().then(updateLog).catch(function(error) {
 				status.textContent = error.message || String(error);
 			});
+		}
+
+		function scrollToBottom(event) {
+			if (event)
+				event.preventDefault();
+			logOutput.scrollTop = logOutput.scrollHeight;
 		}
 
 		updateLog(initialData);
@@ -52,6 +58,10 @@ return view.extend({
 						'class': 'btn cbi-button cbi-button-action',
 						'click': refreshLog
 					}, _('Refresh')),
+					E('button', {
+						'class': 'btn cbi-button cbi-button-action',
+						'click': scrollToBottom
+					}, _('Scroll to Bottom')),
 					status
 				]),
 				logOutput

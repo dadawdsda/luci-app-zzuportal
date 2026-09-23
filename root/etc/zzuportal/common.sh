@@ -14,14 +14,26 @@ ZZUPORTAL_DEFAULT_CHECK_INTERVAL=10
 ZZUPORTAL_DEFAULT_FAILURE_THRESHOLD=3
 ZZUPORTAL_DEFAULT_MAC_SETTLE_DELAY=20
 ZZUPORTAL_DEFAULT_PORTAL_SYNC_DELAY=5
+ZZUPORTAL_DEFAULT_LOG_FILE="/tmp/log/zzuportal/run.log"
 ZZUPORTAL_EXIT_AUTH_FAILURE=10
 
 zzuportal_log() {
 	local priority="$1"
+	local message
+	local timestamp
+	local log_file
 	shift
+	message="$*"
 
 	[ "$priority" = "warning" ] && priority="warn"
-	logger -t "$ZZUPORTAL_LOG_TAG" -p "daemon.$priority" "$*"
+	logger -t "$ZZUPORTAL_LOG_TAG" -p "daemon.$priority" "$message" || :
+
+	log_file="${zzuportal_log_file:-$ZZUPORTAL_DEFAULT_LOG_FILE}"
+	if [ "${zzuportal_log_to_file:-1}" = "1" ] && [ -n "$log_file" ]; then
+		timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+		mkdir -p "$(dirname "$log_file")" 2>/dev/null &&
+			printf '%s [%s] %s\n' "$timestamp" "$priority" "$message" >>"$log_file" 2>/dev/null
+	fi
 }
 
 zzuportal_get_default_route_device() {
@@ -77,10 +89,13 @@ zzuportal_load_config() {
 	config_get zzuportal_failure_threshold main failure_threshold "$ZZUPORTAL_DEFAULT_FAILURE_THRESHOLD"
 	config_get zzuportal_mac_settle_delay main mac_settle_delay "$ZZUPORTAL_DEFAULT_MAC_SETTLE_DELAY"
 	config_get zzuportal_portal_sync_delay main portal_sync_delay "$ZZUPORTAL_DEFAULT_PORTAL_SYNC_DELAY"
+	config_get_bool zzuportal_log_to_file main log_to_file 1
+	config_get zzuportal_log_file main log_file "$ZZUPORTAL_DEFAULT_LOG_FILE"
 
 	[ -n "$zzuportal_login_url" ] || zzuportal_login_url="$ZZUPORTAL_DEFAULT_LOGIN_URL"
 	[ -n "$zzuportal_logout_url" ] || zzuportal_logout_url="$ZZUPORTAL_DEFAULT_LOGOUT_URL"
 	[ -n "$zzuportal_info_url" ] || zzuportal_info_url="$ZZUPORTAL_DEFAULT_INFO_URL"
+	[ -n "$zzuportal_log_file" ] || zzuportal_log_file="$ZZUPORTAL_DEFAULT_LOG_FILE"
 	if [ -z "$zzuportal_check_addresses" ]; then
 		zzuportal_check_addresses="${legacy_check_host:-$ZZUPORTAL_DEFAULT_CHECK_ADDRESSES}"
 	fi
